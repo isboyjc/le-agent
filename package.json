@@ -21,6 +21,9 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@iconify-json/eos-icons": "^1.2.2",
+    "@iconify-json/material-symbols": "^1.2.29",
+    "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/solar": "^1.2.2",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.15.32",
