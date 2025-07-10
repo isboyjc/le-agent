@@ -1,5 +1,7 @@
 import 'virtual:uno.css'
 import '@/styles/main.scss'
+// 导入 highlight.js 的基础样式
+import 'highlight.js/styles/github.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

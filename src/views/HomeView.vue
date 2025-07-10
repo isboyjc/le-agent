@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useChat } from '../hooks/useChat';
+import type { ChatMessage } from '../hooks/useChat';
+import { voteEvent, copyToInputEvent } from '../utils/eventBus';
 
 // 聊天输入框的值
 const chatValue = ref<string>('');
+
+// ChatBox组件引用
+const chatBoxRef = ref();
 
 // 使用AI聊天hook，包含模型相关功能
 const {
@@ -17,29 +22,23 @@ const {
   setModel,
   config,
   // 中断功能
-  interrupt
+  interrupt,
+  // 投票功能
+  updateMessageVote,
+  // MCP相关
+  mcpState,
+  mcpTools
 } = useChat({
-  systemPrompt: '你是一个友善的AI助手，请用中文回答问题。',
-  onMessage: (message) => {
+  systemPrompt: '你是一个友善的AI助手，请用中文回答问题。你可以使用搜索工具来获取实时信息。',
+  onMessage: (message: ChatMessage) => {
     console.log('新消息:', message);
   },
-  onThinking: (thinking) => {
+  onThinking: (thinking: string) => {
     console.log('推理过程更新:', thinking);
   },
-  onError: (error) => {
+  onError: (error: Error) => {
     console.error('AI聊天错误:', error);
   }
-});
-
-// 过滤掉系统消息，只显示用户和助手的对话
-const displayMessages = computed(() => {
-  return messages.value.filter(msg => msg.role !== 'system')
-});
-
-// 获取最后一条助手消息的ID
-const lastAssistantMessageId = computed(() => {
-  const assistantMessages = displayMessages.value.filter(msg => msg.role === 'assistant');
-  return assistantMessages.length > 0 ? assistantMessages[assistantMessages.length - 1].id : null;
 });
 
 // 处理发送消息
@@ -72,13 +71,64 @@ const handleInterrupt = () => {
   interrupt();
 };
 
-// 格式化时间
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+// 处理复制到输入框
+const handleCopyToInput = (content: string) => {
+  chatValue.value = content;
+  console.log('复制到输入框:', content);
 };
+
+// 处理投票事件
+const handleVote = (messageId: string, voteType: 'up' | 'down') => {
+  const currentMessage = messages.value.find(msg => msg.id === messageId);
+  const currentVote = currentMessage?.vote;
+
+  // 切换投票状态
+  let newVote;
+  if (voteType === 'up') {
+    newVote = {
+      isUpvoted: !currentVote?.isUpvoted,
+      isDownvoted: false
+    };
+  } else {
+    newVote = {
+      isUpvoted: false,
+      isDownvoted: !currentVote?.isDownvoted
+    };
+  }
+
+  updateMessageVote(messageId, newVote);
+
+  // 简单的投票确认日志
+  const action = newVote.isUpvoted ? '👍' : newVote.isDownvoted ? '👎' : '❌';
+  console.log(`投票: ${action}`);
+};
+
+// 监听事件总线
+let voteEventHandler: { off: () => void } | undefined;
+let copyToInputEventHandler: { off: () => void } | undefined;
+
+onMounted(() => {
+  // 监听投票事件
+  voteEventHandler = voteEvent.on(({ messageId, voteType }) => {
+    handleVote(messageId, voteType);
+  });
+
+  // 监听复制到输入框事件
+  copyToInputEventHandler = copyToInputEvent.on(({ content }) => {
+    handleCopyToInput(content);
+  });
+
+  // 页面加载时自动给输入框设置焦点
+  setTimeout(() => {
+    chatBoxRef.value?.focus();
+  }, 100);
+});
+
+onUnmounted(() => {
+  // 清理事件监听
+  voteEventHandler?.off();
+  copyToInputEventHandler?.off();
+});
 </script>
 
 <template>
@@ -89,69 +139,15 @@ const formatTime = (timestamp: number) => {
     </div>
 
     <!-- 聊天记录区域 -->
-    <div class="flex flex-col h-full max-w-4xl mx-auto">
+    <div class="flex flex-col h-full w-full mx-auto relative">
       <!-- 消息列表 -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div v-if="displayMessages.length === 0" class="flex items-center justify-center h-full text-text-tertiary">
-          <div class="text-center">
-            <p class="text-lg mb-2">👋 你好阿！</p>
-            <p>我是你的英语学习AI助手，有什么可以帮助你的吗？</p>
-          </div>
-        </div>
-
-        <div v-for="message in displayMessages" :key="message.id" :class="[
-          'flex',
-          message.role === 'user' ? 'justify-end' : 'justify-start'
-        ]">
-          <div :class="[
-            'max-w-[70%] rounded-2xl overflow-hidden',
-            message.role === 'user'
-              ? 'bg-primary text-white p-1'
-              : 'bg-card border border-border'
-          ]">
-            <!-- 推理过程显示（如果有thinking内容） -->
-            <div v-if="message.thinking && message.role === 'assistant'" class="p-3 bg-blue-50 dark:bg-blue-950 mb-3">
-              <div class="flex items-center gap-2">
-                <p class="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center gap-1">
-                  <icon-mdi-brain class="text-sm" />
-                  Thinking
-                </p>
-              </div>
-              <div class="text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap break-words">
-                {{ message.thinking }}
-              </div>
-            </div>
-
-            <!-- 消息内容 -->
-            <div :class="message.role === 'assistant' && message.thinking ? 'p-3' : 'p-3'">
-              <div class="whitespace-pre-wrap break-words">
-                <icon-eos-icons-three-dots-loading class="mr-2"
-                  v-if="isStreaming && message.role === 'assistant' && message.id === lastAssistantMessageId" />
-                <span>{{ message.content }}</span>
-              </div>
-              <div :class="[
-                'text-xs mt-2 opacity-70',
-                message.role === 'user' ? 'text-right' : 'text-left'
-              ]">
-                {{ formatTime(message.timestamp) }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 加载指示器 -->
-        <div v-if="isLoading && !isStreaming" class="flex justify-start">
-          <div class="bg-card border border-border py-2 px-3 rounded-2xl">
-            <icon-eos-icons-three-dots-loading />
-          </div>
-        </div>
-      </div>
+      <MessageBox :messages="messages" :is-loading="isLoading" :is-streaming="isStreaming" />
 
       <!-- 输入区域 -->
-      <div class="w-full px-4 pb-10">
-        <ChatBox v-model="chatValue" :models="models" :current-model="config.model" :loading="isLoading || isStreaming"
-          @send="handleSend" @add="handleAddConversation" @model-change="handleModelChange"
-          @interrupt="handleInterrupt" />
+      <div class="w-full max-w-4xl mx-auto px-4 pb-10">
+        <ChatBox ref="chatBoxRef" v-model="chatValue" :models="models" :current-model="config.model"
+          :loading="isLoading || isStreaming" :mcp-state="mcpState" :mcp-tools="mcpTools" @send="handleSend"
+          @add="handleAddConversation" @model-change="handleModelChange" @interrupt="handleInterrupt" />
       </div>
     </div>
   </main>

@@ -13,8 +13,14 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@ai-sdk/vue": "^1.2.12",
+    "@modelcontextprotocol/sdk": "^1.15.1",
+    "@types/markdown-it": "^14.1.2",
     "@vueuse/core": "^13.5.0",
     "ant-design-vue": "4.x",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-highlightjs": "^4.2.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.4.1",
     "vue": "^3.5.17",

@@ -82,5 +82,46 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      // 代理MCP服务器请求以解决CORS问题
+      '/mcp-proxy': {
+        target: 'https://mcp.api-inference.modelscope.net',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/mcp-proxy/, ''),
+        configure: proxy => {
+          proxy.on('error', err => {
+            console.log('proxy error', err)
+          })
+          proxy.on('proxyReq', (_proxyReq, req) => {
+            console.log('Sending Request to the Target:', req.method, req.url)
+          })
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log(
+              'Received Response from the Target:',
+              proxyRes.statusCode,
+              req.url
+            )
+          })
+        }
+      },
+      // 捕获所有messages请求并转发到MCP服务器
+      '/messages': {
+        target: 'https://mcp.api-inference.modelscope.net',
+        changeOrigin: true,
+        configure: proxy => {
+          proxy.on('error', err => {
+            console.log('messages proxy error', err)
+          })
+          proxy.on('proxyReq', (_proxyReq, req) => {
+            console.log('Messages Request:', req.method, req.url)
+          })
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('Messages Response:', proxyRes.statusCode, req.url)
+          })
+        }
+      }
+    }
   }
 })

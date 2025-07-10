@@ -1,10 +1,11 @@
 <template>
   <div
-    class="relative box-border bg-card w-full overflow-hidden rounded-[24px] border border-border transition-all duration-200">
-    <Textarea
+    class="relative box-border bg-card w-full overflow-hidden rounded-[24px] border border-border transition-all duration-200"
+    :class="{ 'border-foreground': isFocused }">
+    <Textarea ref="textareaRef"
       className="box-border w-full resize-none border-0! bg-transparent! px-5 py-4 text-base outline-none placeholder:text-text-tertiary"
-      v-model:value="value" placeholder="Say something..." :autosize="{ minRows: 1, maxRows: 6 }" class="w-full"
-      @keydown.enter.exact.prevent="handleSendOrInterrupt" />
+      v-model:value="value" placeholder="Say something..." :autoSize="{ minRows: 1, maxRows: 6 }" class="w-full"
+      @keydown.enter.exact.prevent="handleSendOrInterrupt" @focus="isFocused = true" @blur="isFocused = false" />
 
     <!-- 操作栏 -->
     <div class="">
@@ -15,11 +16,96 @@
             title="添加对话" @click="handleAddConversation">
             <icon-material-symbols-add-2-rounded class="" />
           </Button>
-          <Button type="text" shape="circle"
+
+          <!-- MCP服务器下拉菜单 -->
+          <a-dropdown :trigger="['click']"
+            v-if="Object.keys(mcpToolsByServer).length > 0 || mcpState?.isConnecting || mcpState?.error">
+            <Button type="text" shape="circle"
+              class="flex justify-center items-center rounded-4! w-10 h-10 hover:bg-primary hover:text-white transition-all duration-200"
+              title="MCP服务状态">
+              <icon-eos-icons-three-dots-loading v-if="mcpState?.isConnecting" class="text-base animate-spin" />
+              <icon-solar-server-square-cloud-outline v-else class="text-base"
+                :style="{ color: getMCPStatusColor('overall') }" />
+            </Button>
+            <template #overlay>
+              <a-menu class="rounded-2! min-w-[300px]">
+                <!-- MCP总体状态 -->
+                <a-menu-item-group title="MCP服务状态">
+                  <a-menu-item key="status" class="rounded-2! bg-transparent! cursor-default!" disabled>
+                    <div class="flex items-center gap-2 py-1">
+                      <icon-eos-icons-three-dots-loading v-if="mcpState?.isConnecting" class="text-sm animate-spin" />
+                      <icon-solar-server-square-cloud-outline v-else class="text-sm"
+                        :style="{ color: getMCPStatusColor('overall') }" />
+                      <span class="text-sm">
+                        {{ mcpState?.error ? '连接失败' :
+                          mcpState?.isConnecting ? '连接中...' :
+                            mcpState?.isConnected ? `已连接 (共 ${mcpState.tools.length} 个工具)` : '未连接' }}
+                      </span>
+                    </div>
+                    <div v-if="mcpState?.error" class="text-xs mt-1" :style="{ color: 'var(--le-destructive-1)' }">
+                      {{ mcpState.error }}
+                    </div>
+                  </a-menu-item>
+                </a-menu-item-group>
+
+                <!-- 服务器列表 -->
+                <template v-if="Object.keys(mcpToolsByServer).length > 0">
+                  <a-menu-item-group title="MCP服务器">
+                    <a-sub-menu class="rounded-2! overflow-hidden" v-for="(tools, serverName) in mcpToolsByServer"
+                      :key="serverName" :expandIcon="() => null">
+                      <template #title>
+                        <div class="flex items-center gap-2">
+                          <icon-eos-icons-three-dots-loading v-if="mcpState?.isConnecting"
+                            class="text-sm animate-spin" />
+                          <icon-solar-server-square-cloud-outline v-else class="text-sm"
+                            :style="{ color: getMCPStatusColor(serverName) }" />
+                          <span class="flex-1 truncate text-sm">{{ serverName }}</span>
+                          <span class="text-xs px-1 py-0.5 rounded bg-muted">{{ tools.length }}</span>
+                        </div>
+                      </template>
+
+                      <!-- 工具列表 -->
+                      <a-menu-item-group :title="`工具列表 (${tools.length}个)`">
+                        <a-sub-menu class="rounded-2! overflow-hidden" v-for="tool in tools"
+                          :key="`${serverName}-${tool.name}`" :expandIcon="() => null">
+                          <template #title>
+                            <div class="flex items-center gap-2">
+                              <span class="flex-1 truncate text-sm font-mono">{{ tool.name }}</span>
+                            </div>
+                          </template>
+
+                          <!-- 工具详情 -->
+                          <a-menu-item key="description" class="rounded-2! bg-transparent! cursor-default!" disabled>
+                            <div class="py-2 space-y-2 max-w-[250px]">
+                              <div class="text-xs font-medium">描述:</div>
+                              <div class="text-xs text-muted-foreground break-words">
+                                {{ tool.description || '暂无描述' }}
+                              </div>
+
+                              <div v-if="tool.inputSchema && Object.keys(tool.inputSchema).length > 0">
+                                <div class="text-xs font-medium">参数:</div>
+                                <div class="text-xs font-mono bg-muted px-2 py-1 rounded mt-1">
+                                  {{ formatToolSchema(tool.inputSchema) }}
+                                </div>
+                              </div>
+                            </div>
+                          </a-menu-item>
+                        </a-sub-menu>
+                      </a-menu-item-group>
+                    </a-sub-menu>
+                  </a-menu-item-group>
+                </template>
+              </a-menu>
+            </template>
+          </a-dropdown>
+
+          <!-- 无MCP服务时的静态按钮 -->
+          <Button v-else type="text" shape="circle"
             class="flex justify-center items-center rounded-4! w-10 h-10 hover:bg-primary hover:text-white transition-all duration-200"
-            title="服务">
+            title="MCP服务 (未配置)">
             <icon-solar-server-square-cloud-outline class="" />
           </Button>
+
           <a-dropdown :trigger="['click']" v-if="props.models.length > 0">
             <a class="text-sm ml-3 text-text-tertiary hover:text-text-secondary flex items-center gap-1 cursor-pointer transition-colors"
               @click.prevent>
@@ -134,19 +220,53 @@ interface ModelInfo {
   isReasoning?: boolean
 }
 
+// MCP相关类型
+interface MCPTool {
+  name: string
+  description: string
+  inputSchema: Record<string, unknown>
+  serverName?: string
+}
+
+interface MCPState {
+  isConnected: boolean
+  isConnecting: boolean
+  error: string | null
+  tools: MCPTool[]
+  servers: Record<string, { name: string; type: string; url: string }>
+}
+
 // Props定义
 interface Props {
   modelValue?: string;
   models?: ModelInfo[];
   currentModel?: string;
   loading?: boolean;
+  // MCP相关props
+  mcpState?: MCPState;
+  mcpTools?: Array<{
+    type: string;
+    function: {
+      name: string;
+      description: string;
+      parameters: Record<string, unknown>;
+    };
+  }>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   models: () => [],
   currentModel: '',
-  loading: false
+  loading: false,
+  mcpState: () => ({
+    isConnected: false,
+    isConnecting: false,
+    error: null,
+    tools: [],
+    servers: {}
+  }),
+  mcpTools: () => []
 });
 
 // Emits定义
@@ -159,6 +279,20 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>();
+
+// 输入框引用和焦点状态
+const textareaRef = ref();
+const isFocused = ref(false);
+
+// 暴露focus方法给父组件
+const focus = () => {
+  textareaRef.value?.focus();
+};
+
+// 暴露给父组件的方法
+defineExpose({
+  focus
+});
 
 // 使用计算属性来处理v-model
 const value = computed({
@@ -235,7 +369,7 @@ const lastResultTime = ref<number>(0);
 
 // 监听识别结果变化
 watch(result, (newResult) => {
-  if (!newResult) return;
+  if (!newResult || !shouldUpdateInput.value) return;
 
   // 检测到语音活动，重置静音检测
   if (newResult.trim() && newResult !== lastResult.value) {
@@ -257,9 +391,12 @@ watch(result, (newResult) => {
   }
 }, { immediate: true });
 
+// 添加一个标志来控制是否应该更新输入框
+const shouldUpdateInput = ref(true);
+
 // 监听最终结果状态变化
 watch(isFinal, (isResultFinal) => {
-  if (isResultFinal && result.value) {
+  if (isResultFinal && result.value && shouldUpdateInput.value) {
     // 确保最终结果被保存
     if (result.value !== lastResult.value) {
       confirmedResults.value += result.value;
@@ -277,7 +414,10 @@ watch(isListening, (listening) => {
       confirmedResults.value += result.value;
       lastResult.value = result.value;
     }
-    value.value = baseContent.value + confirmedResults.value;
+    // 只在允许更新输入框时更新
+    if (shouldUpdateInput.value) {
+      value.value = baseContent.value + confirmedResults.value;
+    }
 
     // 清除所有定时器
     clearAllTimers();
@@ -302,6 +442,8 @@ const startSilenceDetection = () => {
       autoStopTimer.value = setTimeout(() => {
         if (isListening.value) {
           console.log('检测到长时间静音，自动停止录音');
+          // 确保在自动停止录音时也能更新输入框
+          shouldUpdateInput.value = true;
           toggleRecording();
         }
       }, AUTO_STOP_DELAY);
@@ -348,6 +490,8 @@ const toggleRecording = () => {
     confirmedResults.value = '';
     lastResult.value = '';
     isBlinking.value = false;
+    // 确保允许语音识别结果更新输入框
+    shouldUpdateInput.value = true;
     start();
   }
 };
@@ -369,6 +513,9 @@ const handleSendOrInterrupt = () => {
       stop();
     }
 
+    // 停止语音识别结果更新输入框
+    shouldUpdateInput.value = false;
+
     // 清空输入框和相关状态
     value.value = '';
     baseContent.value = '';
@@ -377,10 +524,73 @@ const handleSendOrInterrupt = () => {
 
     // 清除所有定时器
     clearAllTimers();
+
+    // 延迟恢复语音识别更新功能，确保输入框已清空
+    setTimeout(() => {
+      shouldUpdateInput.value = true;
+    }, 100);
   }
 };
 
+// 按服务器分组MCP工具
+const mcpToolsByServer = computed(() => {
+  const grouped: Record<string, MCPTool[]> = {}
 
+  if (props.mcpState?.tools) {
+    props.mcpState.tools.forEach(tool => {
+      const serverName = tool.serverName || '未知服务器'
+      if (!grouped[serverName]) {
+        grouped[serverName] = []
+      }
+      grouped[serverName].push(tool)
+    })
+  }
+
+  return grouped
+})
+
+// MCP连接状态颜色
+const getMCPStatusColor = (serverName: string) => {
+  if (!props.mcpState) return 'var(--le-text-tertiary)'
+
+  // 处理整体状态
+  if (serverName === 'overall') {
+    if (props.mcpState.error) {
+      return 'var(--le-destructive-1)'
+    } else if (props.mcpState.isConnecting) {
+      return 'var(--le-warning-1)'
+    } else if (props.mcpState.isConnected) {
+      return 'var(--le-success-1)'
+    }
+    return 'var(--le-text-tertiary)'
+  }
+
+  // 处理特定服务器状态
+  if (props.mcpState.error) {
+    return 'var(--le-destructive-1)'
+  } else if (props.mcpState.isConnecting) {
+    return 'var(--le-warning-1)'
+  } else if (props.mcpState.isConnected && props.mcpState.servers[serverName]) {
+    return 'var(--le-success-1)'
+  }
+  return 'var(--le-text-tertiary)'
+}
+
+// 格式化工具参数schema
+const formatToolSchema = (schema: Record<string, unknown>) => {
+  try {
+    if (schema.properties && typeof schema.properties === 'object') {
+      const props = schema.properties as Record<string, unknown>
+      const paramNames = Object.keys(props)
+      if (paramNames.length > 0) {
+        return paramNames.join(', ')
+      }
+    }
+    return 'schema'
+  } catch {
+    return 'schema'
+  }
+}
 
 // 组件卸载时停止录音
 onUnmounted(() => {
