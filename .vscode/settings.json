@@ -1,0 +1,54 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "clsx\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    [
+      "cn\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    [
+      "cva\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "className\\s*[:=]\\s*[\"'`]([^\"'`]*)[\"'`]"
+    ],
+    [
+      "class\\s*[:=]\\s*[\"'`]([^\"'`]*)[\"'`]"
+    ]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "html",
+    "javascript": "html",
+    "typescriptreact": "html",
+    "javascriptreact": "html"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.suggestions": true,
+  "tailwindCSS.validate": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "prettier.requireConfig": true,
+  "prettier.configPath": ".prettierrc.json",
+  "i18n-ally.localesPaths": [
+    "i18n",
+    "messages"
+  ],
+  "i18n-ally.keystyle": "nested"
+}

@@ -4,5 +4,9 @@
   "singleQuote": true,
   "printWidth": 80,
   "arrowParens": "avoid",
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["clsx"],
+  "tailwindStylesheet": "./styles/globals.css",
+  "tailwindConfig": "./tailwind.config.ts"
 }

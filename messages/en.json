@@ -1,0 +1,84 @@
+{
+  "Common": {
+    "search": "Search",
+    "noResults": "No results",
+    "notImplementedYet": "Not implemented yet",
+    "comingSoon": "This feature is coming soon",
+    "showLess": "Show less",
+    "showMore": "Show more",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "Auth": {},
+  "Chat": {
+    "Error": "Chat error",
+    "thisMessageWasNotSavedPleaseTryTheChatAgain": "This message was not saved. Please try the chat again.",
+    "Greeting": {
+      "goodEarlyMorning": "Good morning, {name} is ready",
+      "goodForenoon": "Good forenoon, {name} is ready",
+      "goodNoon": "Good noon, {name} is ready",
+      "goodAfternoon": "Good afternoon, {name} is ready",
+      "goodEvening": "Good evening, {name} is ready",
+      "goodNight": "Good night, {name} is ready, keep learning and rest",
+      "letMeKnowWhenYoureReadyToBegin": "I am {name}, let me know when you're ready to begin.",
+      "whereWouldYouLikeToStart": "Language assistant {name} is online, where would you like to start?",
+      "presets": {
+        "introduce": "Please introduce yourself, what can you help me with?",
+        "introduceEnglish": "Please introduce yourself in English",
+        "workplaceEnglish": "I want to learn workplace English, please output a workplace English passage",
+        "oralExpression": "How to improve oral expression ability, please output an oral expression passage",
+        "basicDialogue": "I have no foundation, please help me generate a basic English dialogue, within 200 words",
+        "translate": "Help me translate a passage",
+        "englishText": "Output an English short text",
+        "japaneseText": "Output a Japanese short text",
+        "koreanText": "Output a Korean short text",
+        "germanText": "Output a German short text",
+        "russianText": "Output a Russian short text",
+        "frenchText": "Output a French short text"
+      }
+    },
+    "placeholder": "Ask any questions or @mention",
+    "Tool": {
+      "selectToolMode": "Select Tool Mode",
+      "autoToolModeDescription": "Auto decide when to use tools, without asking you",
+      "manualToolModeDescription": "Ask for your permission before using any tools",
+      "noneToolModeDescription": "Do not use tools. @mention is still available.",
+      "toolsSetup": "Tools Setup",
+      "toolsSetupDescription": "Select the tools that can be used.\nAI will use the selected tools according to its own judgment.\n\nYou can also force the use of specific tools through @mention."
+    }
+  },
+  "Layout": {
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "KeyboardShortcuts": {
+    "title": "Keyboard Shortcuts",
+    "newChat": "New Chat",
+    "toggleTemporaryChat": "Toggle Temporary Chat",
+    "toggleSidebar": "Toggle Sidebar",
+    "openShortcutsPopup": "Open Shortcuts Popup",
+    "toolMode": "Toggle Tool Mode",
+    "autoSpeech": "Auto Speech",
+    "closeSpeech": "Close Speech"
+  },
+  "LearnMode": {
+    "title": "Learn Mode",
+    "description": "In learn mode, you will get more detailed explanations and richer learning content.",
+    "learn": "Learn",
+    "learnMore": "Learn more",
+    "learnModeClose": "Close Learn Mode",
+    "learnModeCloseDescription": "After closing learn mode, you will return to normal mode.",
+    "words": "Words",
+    "sentences": "Sentences",
+    "source": "Source",
+    "translation": "Translation",
+    "speechRecognition": "Speech Recognition",
+    "targetWord": "Target Word",
+    "targetSentence": "Target Sentence",
+    "listening": "Listening",
+    "speakNow": "Please speak now",
+    "recognizedText": "Recognized Text",
+    "originalText": "Original Text"
+  },
+  "MCP": {},
+  "Error": {}
+}

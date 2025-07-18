@@ -1,0 +1,84 @@
+{
+  "Common": {
+    "search": "搜索",
+    "noResults": "没有结果",
+    "notImplementedYet": "尚未实现",
+    "comingSoon": "此功能即将推出",
+    "showLess": "显示更少",
+    "showMore": "显示更多",
+    "approve": "批准",
+    "reject": "拒绝"
+  },
+  "Auth": {},
+  "Chat": {
+    "Error": "聊天错误",
+    "thisMessageWasNotSavedPleaseTryTheChatAgain": "此消息未保存。请重试聊天。",
+    "Greeting": {
+      "goodEarlyMorning": "早上好，{name}已就绪",
+      "goodForenoon": "上午好，{name}已就绪",
+      "goodNoon": "中午好，{name}已就绪",
+      "goodAfternoon": "下午好，{name}已就绪",
+      "goodEvening": "晚上好，{name}已就绪",
+      "goodNight": "夜深了，{name}已就绪，再学习一会儿就休息吧",
+      "letMeKnowWhenYoureReadyToBegin": "我是{name}，准备好开始时请告诉我。",
+      "whereWouldYouLikeToStart": "语言小助手{name}已上线，您想从哪里开始？",
+      "presets": {
+        "introduce": "请介绍一下你自己，你能帮我做什么？",
+        "introduceEnglish": "请使用英文介绍一下你自己",
+        "workplaceEnglish": "我想要学习职场英语，请你输出一段职场英语",
+        "oralExpression": "如何提高口语表达能力，请你输出一段口语表达",
+        "basicDialogue": "我没有基础，请你帮我生成一段基础的英语对话，词数在200之内",
+        "translate": "帮我翻译一段话",
+        "englishText": "输出一段英文短文",
+        "japaneseText": "输出一段日文短文",
+        "koreanText": "输出一段韩文短文",
+        "germanText": "输出一段德语短文",
+        "russianText": "输出一段俄语短文",
+        "frenchText": "输出一段法语短文"
+      }
+    },
+    "placeholder": "询问任何问题或 @mention",
+    "Tool": {
+      "selectToolMode": "选择工具模式",
+      "autoToolModeDescription": "自动决定何时使用工具，无需询问您",
+      "manualToolModeDescription": "在使用任何工具前询问您的许可",
+      "noneToolModeDescription": "不使用工具。@mention 仍然可用。",
+      "toolsSetup": "工具设置",
+      "toolsSetupDescription": "选择可以使用的工具。\nAI将根据自己的判断使用选定的工具。\n\n您也可以通过 @mention 强制使用特定工具。"
+    }
+  },
+  "Layout": {
+    "toggleSidebar": "切换侧边栏"
+  },
+  "KeyboardShortcuts": {
+    "title": "键盘快捷键",
+    "newChat": "新聊天",
+    "toggleTemporaryChat": "切换临时聊天",
+    "toggleSidebar": "切换侧边栏",
+    "openShortcutsPopup": "打开快捷键弹窗",
+    "toolMode": "切换工具模式",
+    "autoSpeech": "自动朗读",
+    "closeSpeech": "关闭朗读"
+  },
+  "LearnMode": {
+    "title": "学习模式",
+    "description": "学习模式下，您将获得更详细的解释和更丰富的学习内容。",
+    "learn": "学习",
+    "learnMore": "学习更多",
+    "learnModeClose": "关闭学习模式",
+    "learnModeCloseDescription": "关闭学习模式后，您将恢复到正常模式。",
+    "words": "词组",
+    "sentences": "句子",
+    "source": "原文",
+    "translation": "翻译",
+    "speechRecognition": "语音识别",
+    "targetWord": "目标词汇",
+    "targetSentence": "目标句子",
+    "listening": "正在听取",
+    "speakNow": "请开始说话",
+    "recognizedText": "识别文本",
+    "originalText": "原文"
+  },
+  "MCP": {},
+  "Error": {}
+}
